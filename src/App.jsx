@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import AppShell from './components/AppShell'
 import Dashboard from './components/Dashboard'
 import CommunityView from './components/CommunityView'
+import UserProfile from './components/UserProfile'
 import { AppProvider } from './context/AppContext'
 
 function App() {
@@ -22,6 +23,11 @@ function App() {
         {currentView === 'community' && selectedCommunity && (
           <CommunityView 
             community={selectedCommunity} 
+            onNavigate={handleNavigate} 
+          />
+        )}
+        {currentView === 'profile' && (
+          <UserProfile 
             onNavigate={handleNavigate} 
           />
         )}

@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { TrendingUp, Users, MessageSquare, BookOpen, Plus, Search, Filter } from 'lucide-react'
 import CommunityCard from './CommunityCard'
 import StatsCard from './StatsCard'
 import AIChatLauncher from './AIChatLauncher'
+import CreateCommunityModal from './CreateCommunityModal'
 import { useApp } from '../context/AppContext'
 
 const Dashboard = ({ onNavigate }) => {
@@ -14,6 +15,8 @@ const Dashboard = ({ onNavigate }) => {
     selectedTags,
     setSelectedTags 
   } = useApp()
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   const joinedCommunities = filteredCommunities.filter(c => user.joinedCommunities.includes(c.id))
   const trendingCommunities = filteredCommunities.filter(c => c.trending)
@@ -72,7 +75,10 @@ const Dashboard = ({ onNavigate }) => {
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <AIChatLauncher variant="primary" />
-          <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
             <Plus size={16} />
             <span>Create Community</span>
           </button>
@@ -184,6 +190,12 @@ const Dashboard = ({ onNavigate }) => {
             ))}
         </div>
       </section>
+
+      {/* Create Community Modal */}
+      <CreateCommunityModal 
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   )
 }

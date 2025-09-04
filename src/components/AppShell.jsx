@@ -83,15 +83,18 @@ const AppShell = ({ children, onNavigate, currentView }) => {
 
           {/* User Profile */}
           <div className="p-4 border-t border-dark-border">
-            <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-dark-border transition-colors cursor-pointer">
+            <button 
+              onClick={() => onNavigate('profile')}
+              className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-dark-border transition-colors cursor-pointer"
+            >
               <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center">
                 <User size={20} className="text-white" />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-medium text-dark-text truncate">{user.username}</p>
                 <p className="text-xs text-dark-muted truncate">{user.email}</p>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </div>

@@ -194,6 +194,35 @@ export const AppProvider = ({ children }) => {
     ))
   }
 
+  const createCommunity = async (communityData) => {
+    const newCommunity = {
+      id: Date.now(),
+      ...communityData,
+      memberCount: 1,
+      postsCount: 0,
+      trending: false,
+      createdAt: new Date().toISOString(),
+      creatorId: user.id,
+      posts: [],
+      resources: []
+    }
+
+    setCommunities(prev => [newCommunity, ...prev])
+    
+    // Auto-join the creator to the community
+    setUser(prev => ({
+      ...prev,
+      joinedCommunities: [...prev.joinedCommunities, newCommunity.id]
+    }))
+
+    return newCommunity
+  }
+
+  const updateUser = async (updatedUser) => {
+    setUser(updatedUser)
+    return updatedUser
+  }
+
   const value = {
     user,
     communities,
@@ -206,6 +235,8 @@ export const AppProvider = ({ children }) => {
     leaveCommunity,
     addPost,
     addComment,
+    createCommunity,
+    updateUser,
   }
 
   return (
