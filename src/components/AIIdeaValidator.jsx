@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Send, Lightbulb, TrendingUp, Target, DollarSign, Users, AlertCircle } from 'lucide-react'
+import { Send, Lightbulb, TrendingUp, Target, DollarSign, Users, AlertCircle, Wifi, WifiOff } from 'lucide-react'
+import { validateBusinessIdea, isOpenAIConfigured } from '../services/openai'
 
 const AIIdeaValidator = ({ onClose }) => {
   const [messages, setMessages] = useState([
@@ -33,20 +34,80 @@ const AIIdeaValidator = ({ onClose }) => {
     }
 
     setMessages(prev => [...prev, userMessage])
+    const currentInput = inputValue
     setInputValue('')
     setIsLoading(true)
 
-    // Simulate AI response (in real app, this would call OpenAI API)
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(inputValue)
-      setMessages(prev => [...prev, {
+    try {
+      // Call real OpenAI API
+      const result = await validateBusinessIdea(currentInput)
+      
+      const aiResponse = {
         id: Date.now(),
         type: 'ai',
-        content: aiResponse,
-        timestamp: new Date()
-      }])
+        content: result.success ? result.response : result.fallbackResponse,
+        timestamp: new Date(),
+        isUsingAPI: result.success,
+        error: result.error
+      }
+
+      setMessages(prev => [...prev, aiResponse])
+    } catch (error) {
+      console.error('Error validating idea:', error)
+      const errorResponse = {
+        id: Date.now(),
+        type: 'ai',
+        content: generateFallbackResponse(currentInput),
+        timestamp: new Date(),
+        isUsingAPI: false,
+        error: 'Connection failed'
+      }
+      setMessages(prev => [...prev, errorResponse])
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
+  }
+
+  const generateFallbackResponse = (idea) => {
+    const responses = [
+      `Great idea! "${idea}" shows promise in the AI space. Here's some structured feedback:
+
+**Market Potential**: This type of AI solution addresses a real need in the market. Consider researching your target audience size and willingness to pay.
+
+**Technical Feasibility**: The core AI components seem achievable with current technology. Focus on starting with an MVP to validate core assumptions.
+
+**Business Model**: Consider subscription, freemium, or usage-based pricing models. Research what similar solutions charge.
+
+**Next Steps**:
+• Validate the problem with potential users
+• Build a simple prototype or mockup
+• Research competitors and differentiation
+• Consider technical requirements and costs
+
+Keep refining your idea and don't hesitate to test it with real users early!`,
+
+      `Interesting concept! "${idea}" has potential in the AI market. Here's my analysis:
+
+**Strengths**:
+• Addresses a clear market need
+• Leverages AI effectively
+• Scalable solution approach
+
+**Areas to Explore**:
+• Target market size and segments
+• Revenue model and pricing strategy
+• Technical implementation roadmap
+
+**Recommended Actions**:
+1. Conduct user interviews to validate the problem
+2. Research existing solutions and gaps
+3. Create a technical feasibility study
+4. Test core assumptions with potential users
+
+This is a solid starting point - keep iterating and validating!`
+    ]
+    
+    return responses[Math.floor(Math.random() * responses.length)]
   }
 
   const generateAIResponse = (idea) => {
@@ -99,9 +160,23 @@ Would you like me to dive deeper into any of these areas?`
               `}
             >
               {message.type === 'ai' && (
-                <div className="flex items-center space-x-2 mb-2">
-                  <Lightbulb size={16} className="text-purple-400" />
-                  <span className="text-sm font-medium text-purple-400">AI Validator</span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <Lightbulb size={16} className="text-purple-400" />
+                    <span className="text-sm font-medium text-purple-400">AI Validator</span>
+                  </div>
+                  {message.isUsingAPI !== undefined && (
+                    <div className="flex items-center space-x-1">
+                      {message.isUsingAPI ? (
+                        <Wifi size={12} className="text-green-400" />
+                      ) : (
+                        <WifiOff size={12} className="text-yellow-400" />
+                      )}
+                      <span className="text-xs text-gray-400">
+                        {message.isUsingAPI ? 'Live AI' : 'Demo Mode'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
               <p className="whitespace-pre-line">{message.content}</p>

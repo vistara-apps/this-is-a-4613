@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Brain, Sparkles, X, Send, Lightbulb } from 'lucide-react'
+import { Brain, Sparkles, X, Send, Lightbulb, Wifi, WifiOff } from 'lucide-react'
 import AIIdeaValidator from './AIIdeaValidator'
+import { isOpenAIConfigured } from '../services/openai'
 
 const AIChatLauncher = ({ variant = 'primary' }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -35,7 +36,19 @@ const AIChatLauncher = ({ variant = 'primary' }) => {
                   <Brain className="text-white" size={20} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-dark-text">AI Idea Validator</h2>
+                  <div className="flex items-center space-x-2">
+                    <h2 className="text-lg font-semibold text-dark-text">AI Idea Validator</h2>
+                    <div className="flex items-center space-x-1">
+                      {isOpenAIConfigured() ? (
+                        <Wifi size={14} className="text-green-400" />
+                      ) : (
+                        <WifiOff size={14} className="text-yellow-400" />
+                      )}
+                      <span className="text-xs text-gray-400">
+                        {isOpenAIConfigured() ? 'Live AI' : 'Demo Mode'}
+                      </span>
+                    </div>
+                  </div>
                   <p className="text-sm text-dark-muted">Get instant feedback on your AI business ideas</p>
                 </div>
               </div>
