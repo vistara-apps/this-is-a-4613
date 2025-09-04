@@ -20,12 +20,42 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      run: |
+        # Clean install with retry logic
+        npm ci --no-audit --no-fund || {
+          echo "First npm ci failed, cleaning and retrying..."
+          rm -rf node_modules package-lock.json
+          npm install --package-lock-only
+          npm ci --no-audit --no-fund
+        }
+
+    - name: Verify installation
+      run: |
+        echo "Node version: $(node --version)"
+        echo "NPM version: $(npm --version)"
+        echo "Checking package.json..."
+        cat package.json
+        echo "Checking if node_modules exists..."
+        ls -la node_modules/ | head -10
 
     - name: Build application
-      run: npm run build
+      run: |
+        echo "Starting build process..."
+        npm run build || {
+          echo "Build failed, checking for common issues..."
+          echo "Disk space:"
+          df -h
+          echo "Memory usage:"
+          free -h
+          echo "Node processes:"
+          ps aux | grep node
+          exit 1
+        }
+        echo "Build completed successfully!"
+        ls -la dist/
       env:
         NODE_OPTIONS: --max-old-space-size=4096
+        CI: true
         
     - name: Deploy to Vercel (Production)
       if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && secrets.VERCEL_TOKEN != ''
